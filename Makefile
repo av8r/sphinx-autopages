@@ -39,6 +39,7 @@ git_tag_%:
 
 .PHONY: clean
 clean:
+	@rm -rf dist .coverage coverage.xml
 	@rm -rf docs/_build docs/apidocs
 	@find . -name __pycache__ -type d -print0 | xargs -0 rm -rf
 	@find docs/demos -name _demo_\* -type d -print0 | xargs -0 rm -rf
@@ -46,9 +47,17 @@ clean:
 
 .PHONY: build
 build:
+	@rm -rf dist
 	@poetry build
+	@twine check dist/*
 
 .PHONY: publish
-publish:
-	@poetry publish --build
+publish: build
+	@poetry publish
+
+
+.PHONY: coverage
+coverage:
+	@pytest --cov=sphinx_autopages --cov-report=xml --cov-report=term-missing
+
 

@@ -23,8 +23,7 @@ Guide
 
 The most basic usage is to render Toc with the list of page generated.
 
-.. code-block:: RST
-   :caption: demo.rst
+.. code-block:: rst
 
     Demo
     ----
