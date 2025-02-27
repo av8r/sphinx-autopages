@@ -42,3 +42,13 @@ clean:
 	@rm -rf docs/_build docs/apidocs
 	@find . -name __pycache__ -type d -print0 | xargs -0 rm -rf
 	@find docs/demos -name _demo_\* -type d -print0 | xargs -0 rm -rf
+
+
+.PHONY: build
+build:
+	@poetry build
+
+.PHONY: publish
+publish:
+	@poetry publish --build
+
