@@ -2,7 +2,7 @@ SRCPATH :=  $(CURDIR)
 PROJECTNAME := $(shell basename $(CURDIR))
 TOPTARGET := help
 GITCURBRANCH := $(shell git rev-parse --abrev-ref HEAD)
-#SUBDIRS := $(wildcard */.)
+SUBDIRS := $(wildcard */.)
 
 define HELP
 Manage $(PROJECTNAME). Usage:
@@ -26,7 +26,6 @@ docs:
 	@poetry run sphinx-build --color -T -a -n -E -c docs docs docs/_build
 
 
-
 # .PHONY: git_tag_%
 git_tag_%:
 	@$(if $(shell ./check_semver.py ${*} 2>/dev/null),, $(error Invalid tag: ${*}))
@@ -38,3 +37,8 @@ git_tag_%:
 		&& rm pyproject.toml.old
 
 
+.PHONY: clean
+clean:
+	@rm -rf docs/_build
+	@find . -name __pycache__ -type d -delete
+	@find docs/demos -name _demo_\* -type d -delete

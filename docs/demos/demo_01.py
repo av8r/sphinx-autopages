@@ -18,6 +18,7 @@ def autopages_callable(app: Sphinx, *args, **kwargs) -> list[str]:  # noqa: ANN0
     if kwargs.get("debug", False):
         logger.info(f"autopage_callable - args: {args}")
         logger.info(f"autopage_callable - kwargs: {kwargs}")
+        logger.info(f"Sphinx extensions: {app.config.extensions}")
 
     genfiles = []
     nb_pages = max(int(kwargs.get("nb_pages", "0")), 1)
