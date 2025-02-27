@@ -1,0 +1,122 @@
+# https://python-poetry.org/docs/pyproject/
+# https://python-poetry.org/docs/1.8/pyproject/
+
+# [project]
+# name =
+
+[tool.poetry]
+name = "sphinx_autopages"
+version = "0.0.1"
+description = "sphinx autopages ectension"
+license = "BSD-3-Clause"
+authors = [
+  "Stephane ENGEL <stephane.engel@gmail.com>",
+]
+readme = "README.rst"
+# homepage = "https://github.com/av8r/sphinx-autopages"
+repository = "https://github.com/av8r/sphinx-autopages"
+# documentation = "https://sphinx-autopages .readthedocs.io/"
+keywords = ["sphinx", "extension"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Framework :: Sphinx :: Extension",                              "Intended Audience :: Developers",                               "License :: OSI Approved :: BSD License",                        "Programming Language :: Python :: 3",
+]
+
+# [tool.poetry.urls]
+# "Bug Tracker" = "https://github.com/python-poetry/poetry/issues"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+#
+sphinx = "*"
+
+# [tool.poetry.group.dev.dependencies]
+[tool.poetry.group.test.dependencies]
+# https://www.gpxz.io/blog/ruff
+pylint = "*"
+flake8 = "*"
+black = "*"
+pytest = "*"
+mypy = "*"
+ruff = "*"
+coverage = "*"
+pytest-cov = "*"
+
+[tool.poetry.group.docs.dependencies]
+# -- theme
+pydata-sphinx-theme = "*"
+# -- markdown
+myst-nb = "*"
+myst-parser = "*"
+linkify-it-py = "*"
+markdown-it-py = "*"
+# -- autodoc
+sphinx-autodoc-typehints = "*"
+annotated-types = "*"
+# -- autodoc numpy docstring
+sphinxcontrib-napoleon = "*"
+sphinxcontrib-serializinghtml = "*"
+numpydoc = "*"
+# -- plugins
+sphinx-jinja2 = "*"
+sphinxcontrib-jquery = "*"
+sphinx-design = "*"
+sphinx-copybutton = "*"
+sphinx-togglebutton = "*"
+sphinx-click = "*"
+sphinxcontrib-mermaid = "*"
+## sphinxcontrib-termynal = { git = "https://github.com/sphinx-contrib/sphinxcontrib-termynal.git", branch = "main" }
+
+
+
+[tool.flit.module]
+name = "sphinx_autopages"
+
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+select = [
+    "A",  # prevent using keywords that clobber python builtins
+    "ANN",
+    "ASYNC",
+    "B",  # bugbear: security warnings
+    "C",
+    "DTZ",
+    "E",  # pycodestyle
+    "F",  # pyflakes
+    "I",    # isort: sort import automaticaly
+    "ISC",  # implicit string concatenation
+    "N",
+    "PIE",
+    "PL",
+    "Q",
+    "R",
+    "SIM",
+    "T",
+    "UP",  # alert you when better syntax is available in your python version
+    "RUF",  # the ruff developer's own rules
+    "W",
+]
+
+ignore = [
+    "ANN101",   # self annotation
+]
+
+# [tool.ruff.flake8-bugbear]
+# extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Body"]
+
+[tool.mypy]
+ignore_missing_imports = true
+# plugins = "sqlaschemy.ext.mypy.plugin"
+strict = true
+show_error_codes = true
+
+[tool.coverage.run]
+omit = ["*/_private.py"]
+
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
