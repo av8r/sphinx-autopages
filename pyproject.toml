@@ -6,8 +6,8 @@
 
 [tool.poetry]
 name = "sphinx_autopages"
-version = "0.0.1"
-description = "sphinx autopages ectension"
+version = "0.0.2"
+description = "sphinx autopages extension"
 license = "BSD-3-Clause"
 authors = [
   "Stephane ENGEL <stephane.engel@gmail.com>",
