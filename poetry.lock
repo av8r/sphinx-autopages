@@ -2145,6 +2145,27 @@ docs = ["furo (>=2024.8.6)"]
 testing = ["covdefaults (>=2.3)", "coverage (>=7.6.12)", "defusedxml (>=0.7.1)", "diff-cover (>=9.2.3)", "pytest (>=8.3.4)", "pytest-cov (>=6)", "sphobjinv (>=2.3.1.2)", "typing-extensions (>=4.12.2)"]
 
 [[package]]
+name = "sphinx-autodoc2"
+version = "0.5.0"
+description = "Analyse a python project and create documentation for it."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "sphinx_autodoc2-0.5.0-py3-none-any.whl", hash = "sha256:e867013b1512f9d6d7e6f6799f8b537d6884462acd118ef361f3f619a60b5c9e"},
+    {file = "sphinx_autodoc2-0.5.0.tar.gz", hash = "sha256:7d76044aa81d6af74447080182b6868c7eb066874edc835e8ddf810735b6565a"},
+]
+
+[package.dependencies]
+astroid = ">=2.7,<4"
+typing-extensions = "*"
+
+[package.extras]
+cli = ["typer[all]"]
+docs = ["furo", "myst-parser", "sphinx (>=4.0.0)"]
+sphinx = ["sphinx (>=4.0.0)"]
+testing = ["pytest", "pytest-cov", "pytest-regressions", "sphinx (>=4.0.0,<7)"]
+
+[[package]]
 name = "sphinx-click"
 version = "6.0.0"
 description = "Sphinx extension that automatically documents click applications"
@@ -2646,4 +2667,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "85b3ff288643a395f62d54a26482058eec0433e443019937544e990ac0a4ad66"
+content-hash = "06e349be743aade23a4ac6402dd79fa5bdac25263667642789a69f9e440dcee0"

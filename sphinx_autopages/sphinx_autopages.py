@@ -36,6 +36,9 @@ class AutoPages:
             if not all_genfiles:
                 all_genfiles = []
             for doc in from_docs:
+                # XXX - hack
+                if doc.startswith("apidocs/"):
+                    continue
                 if suffixes:
                     # lookup for doc name with suffix in list of suffixes
                     all_docs: list[Path] = list(self.env.srcdir.resolve().glob(f"{doc}.*"))

@@ -24,7 +24,43 @@ version = __version__ or "DEV"
 
 extensions = [
     "sphinx_autopages",
+    "autodoc2",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
 ]
+
+# autodoc2
+if "autodoc2" in extensions:
+    autodoc2_packages = [
+        {
+            "path": "../sphinx_autopages",
+        },
+    ]
+    autodoc2_hidden_objects = ["dunder", "private", "inherited"]
+    autodoc2_replace_annotations = [
+        ("re.Pattern", "typing.Pattern"),
+        ("markdown_it.MarkdownIt", "markdown_it.main.MarkdownIt"),
+    ]
+    autodoc2_replace_bases = [
+        ("sphinx.directives.SphinxDirective", "sphinx.util.docutils.SphinxDirective"),
+    ]
+    autodoc2_docstring_parser_regexes = [
+        # ("myst_parser", "myst"),
+        # (r"myst_parser\.setup", "myst"),
+    ]
+    nitpicky = True
+    nitpick_ignore_regex = [
+        (r"py:.*", r"docutils\..*"),
+        (r"py:.*", r"sphinx\..*"),
+    ]
+    nitpick_ignore = [
+        # ("py:obj", "myst_parser._docs._ConfigBase"),
+        # ("py:exc", "MarkupError"),
+        # ("py:class", "sphinx.util.typing.Inventory"),
+        # ("py:class", "sphinx.writers.html.HTMLTranslator"),
+        # ("py:obj", "sphinx.transforms.post_transforms.ReferencesResolver"),
+    ]
 
 # -- theme setup
 html_theme = "pydata_sphinx_theme"

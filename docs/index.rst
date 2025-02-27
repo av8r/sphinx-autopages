@@ -14,7 +14,7 @@
    :caption: API Specification
    :maxdepth: 6
 
-   api/index
+   apidocs/index.rst
 
 
 

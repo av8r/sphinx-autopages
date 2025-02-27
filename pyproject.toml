@@ -51,6 +51,7 @@ myst-parser = "*"
 linkify-it-py = "*"
 markdown-it-py = "*"
 # -- autodoc
+sphinx-autodoc2 = "*"
 sphinx-autodoc-typehints = "*"
 annotated-types = "*"
 # -- autodoc numpy docstring
