@@ -990,6 +990,20 @@ doc = ["myst-parser", "sphinx", "sphinx-book-theme"]
 test = ["coverage", "pytest", "pytest-cov"]
 
 [[package]]
+name = "lorem-text"
+version = "2.1"
+description = "Dummy lorem ipsum text generator"
+optional = false
+python-versions = ">=3.5"
+files = [
+    {file = "lorem_text-2.1-py2.py3-none-any.whl", hash = "sha256:b512779addd08dcc221460ce428f7911b198f66c5763410f3de6d788eb62ceb3"},
+    {file = "lorem_text-2.1.tar.gz", hash = "sha256:b984b5570295084012f5a9385672bab3470965c943b73d8d71a6efcd7a62b5c3"},
+]
+
+[package.dependencies]
+Click = ">=7.0"
+
+[[package]]
 name = "markdown-it-py"
 version = "3.0.0"
 description = "Python port of markdown-it. Markdown parsing, done right!"
@@ -2667,4 +2681,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "06e349be743aade23a4ac6402dd79fa5bdac25263667642789a69f9e440dcee0"
+content-hash = "e46f89880427c3d4d7bc25462749502bde0bb44d6e147161048c7eb625e6ca7d"

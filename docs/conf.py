@@ -5,9 +5,11 @@ from sphinx.util import logging
 
 logger = logging.getLogger(__name__)
 
+# import demos callables
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from demos import *  # noqa: E402, F403
+
 sys.setrecursionlimit(1500)
-from demos import autopages_callable  # noqa: E402
 
 try:
     from sphinx_autopages import __version__
@@ -106,9 +108,3 @@ html_theme_options = {
     # ],
 }
 
-# Ensure callable
-for helper_callable in [
-    autopages_callable
-]:
-    if not callable(helper_callable):
-        raise RuntimeError(f"{helper_callable} is not callable")

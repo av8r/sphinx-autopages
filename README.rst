@@ -5,12 +5,12 @@ sphinx-autopages
 
 .. note::
 
-    Idea taken from `Sphinx Extension Page Generation <https://github.com/Sam-Martin/sphinx-write-pages-tutorial>`__.
+    Idea taken from `Sphinx Extension Page Generation <https://github.com/Sam-Martin/sphinx-write-pages-tutorial>`_.
 
 Usage
 -----
 
-Simply install and add ``sphinx_autopages`` to your ``conf.py`` extensions list.
+Simply install and add ``sphinx-autopages`` to your ``conf.py`` extensions list.
 
 .. code-block:: bash
 

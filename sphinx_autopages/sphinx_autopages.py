@@ -95,7 +95,10 @@ class AutoPages:
                         logger.info(f"Running {fct.__name__}({fct_args}, {fct_kwargs})")
 
                         # push generated files in _IDX
-                        _IDX_MAP[doc] = work_dir.relative_to(self.env.srcdir)
+                        if not doc in _IDX_MAP:
+                            _IDX_MAP[doc] = {}
+                        # _IDX_MAP[doc].append(work_dir.relative_to(self.env.srcdir))
+                        _IDX_MAP[doc][work_dir.relative_to(self.env.srcdir)] = []
 
                         # Run fct_helper from working_directory
                         os.chdir(work_dir)
@@ -109,6 +112,7 @@ class AutoPages:
                                 suffixes=suffixes,
                                 all_genfiles=all_genfiles
                             )
+                            _IDX_MAP[doc][work_dir.relative_to(self.env.srcdir)] = local_genfiles
                         else:
                             logger.warning(f"{doc}, {fct.__name__}:{line_num} "
                                            f"does not return a list of created files.")
@@ -154,6 +158,7 @@ class AutoPagesDirective(SphinxDirective):
         # logger.warning(f"XXX arguments: {pformat(self.arguments, indent=4)}")
         doc = Path(self.env.docname)
         work_dir = Path(doc.parent / f"_{doc.stem}_{self.lineno}")
+        # logger.warning(f"DEBUG: make TOC {self.env.docname} in dir {work_dir}")
 
         rst = ".. toctree::\n"
         rst += "\n".join([ f"   :{k}: {v}"
@@ -173,18 +178,14 @@ class AutoPagesDirective(SphinxDirective):
         rst += "\n\n"
         len_rst = len(rst)
 
-        for file_name in sorted(
-                [
-                    x for x in Path(self.env.srcdir / _IDX_MAP.get(self.env.docname)).iterdir()
-                    if x.is_file()
-                ]
-        ):
-            f_name = Path(file_name.relative_to(self.env.srcdir)).relative_to(work_dir.parent)
-            rst += f"   {f_name}\n"
+        for file_name in sorted(_IDX_MAP.get(self.env.docname).get(work_dir)):
+            f_name = Path(file_name).relative_to(Path(self.env.docname).parent)
+            rst += f"   {f_name!s}\n"
+
         if len(rst) == len_rst:
             logger.warning(f"Something Wrong: index without file: {self.env.docname}")
         # else:
-        #     logger.warning(rst)
+        #     logger.warning(f"DEBUG\n{rst}")
         return self.parse_rst(rst)
 
     def parse_rst(self, text: str) -> list[Node]:

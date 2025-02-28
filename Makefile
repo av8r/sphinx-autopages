@@ -5,15 +5,23 @@ GITCURBRANCH := $(shell git rev-parse --abrev-ref HEAD)
 SUBDIRS := $(wildcard */.)
 
 define HELP
-Manage $(PROJECTNAME). Usage:
+Manage $(PROJECTNAME).
+Usage:
 
-make docs			- make sphinx doc
-make git_tag_TAG	- git tag TAG
+make docs           - make sphinx doc
+
+make build          - build project
+make publish        - publish to pypi
+make clean          - clean project
+
+make coverage       - pytest coverage (WIP)
+
+make git_tag_TAG    - git tag TAG
 endef
 export HELP
 
 # .PHONY: target_1 target_...
-.PHONY: docs
+.PHONY: docs clean build publish coverage
 
 .PHONY: help
 help:
@@ -42,7 +50,7 @@ clean:
 	@rm -rf dist .coverage coverage.xml
 	@rm -rf docs/_build docs/apidocs
 	@find . -name __pycache__ -type d -print0 | xargs -0 rm -rf
-	@find docs/demos -name _demo_\* -type d -print0 | xargs -0 rm -rf
+	@find docs/demos -name _\* -type d -print0 | xargs -0 rm -rf
 
 
 .PHONY: build
@@ -52,7 +60,7 @@ build:
 	@twine check dist/*
 
 .PHONY: publish
-publish: build
+publish: clean build
 	@poetry publish
 
 

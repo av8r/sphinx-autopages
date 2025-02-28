@@ -6,7 +6,7 @@
 
 [tool.poetry]
 name = "sphinx_autopages"
-version = "0.0.2"
+version = "0.0.3"
 description = "sphinx autopages extension"
 license = "BSD-3-Clause"
 authors = [
@@ -67,7 +67,7 @@ sphinx-togglebutton = "*"
 sphinx-click = "*"
 sphinxcontrib-mermaid = "*"
 ## sphinxcontrib-termynal = { git = "https://github.com/sphinx-contrib/sphinxcontrib-termynal.git", branch = "main" }
-
+lorem-text = "*"
 
 
 [tool.flit.module]
