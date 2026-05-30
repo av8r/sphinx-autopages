@@ -1,5 +1,13 @@
 .. include:: ../README.rst
 
+.. toctree::
+   :hidden:
+   :caption: Docs
+   :maxdepth: 6
+
+   docs/index
+
+
 
 .. toctree::
    :hidden:

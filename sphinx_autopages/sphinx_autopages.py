@@ -1,6 +1,7 @@
 import importlib.util
 import os
 import re
+import shelve
 from ast import literal_eval
 from pathlib import Path
 from typing import ClassVar
@@ -20,37 +21,47 @@ from sphinx.util.typing import OptionSpec
 logger = logging.getLogger(__name__)
 # logger.setLevel(logging.LEVEL_NAMES["DEBUG"])
 
-_IDX_MAP = {}
 
 class AutoPages:
     def __init__(self, app: Sphinx) -> None:
+        self.module = None
         self.app: Sphinx = app
         self.env: BuildEnvironment = app.builder.env
+        self._excludes : list = []
 
-    def autopages(self) -> list[str] | None:
-        def get_genfiles(
-                from_docs: list[str],
-                suffixes: list[str] | None = None,
-                all_genfiles: list[str] | None = None
-        ) -> list[str] | None:
-            if not all_genfiles:
-                all_genfiles = []
-            for doc in from_docs:
-                # XXX - hack
-                if doc.startswith("apidocs/"):
+        self.autopages_map_docs = shelve.open(  # noqa: SIM115
+            self.app.env.config.autopages_map_docs,
+            flag="c",
+            writeback=True
+        )
+
+
+    def _get_genfiles(
+            self,
+            from_docs: list[str],
+            suffixes: list[str] | None = None,
+    ) -> list[str] | None:
+        for doc in from_docs:
+            # skip exclude
+            for _exclude in self._excludes:
+                if doc.startswith(_exclude):
                     continue
-                if suffixes:
-                    # lookup for doc name with suffix in list of suffixes
-                    all_docs: list[Path] = list(self.env.srcdir.resolve().glob(f"{doc}.*"))
-                    full_docs = [_doc for _doc in all_docs if _doc.suffix in suffixes]
-                    assert len(full_docs), f"Can't find {doc} suffix in {suffixes}"
-                    if len(full_docs) > 1:
-                        logger.warning(f"{doc} > 1 suffix--> {full_docs}, use {full_docs[0]}")
-                    full_doc = full_docs[0]
-                else:
-                    full_doc = doc
-                # find our directive and pase it in doc file
-                # parse directive ars and split it in fct_helper, *args and **kwargs
+            if suffixes:
+                # lookup for doc name with suffix in list of suffixes
+                full_docs: list[Path] =[
+                    Path(self.env.srcdir.resolve() / f"{doc}{suffix}")
+                    for suffix in suffixes
+                    if Path(self.env.srcdir.resolve() / f"{doc}{suffix}").is_file()
+                ]
+                assert full_docs, f"Can't find {doc} suffix in {suffixes}"
+                assert len(full_docs) == 1, f"{doc} has more then on suffix [{full_docs}]"
+            else:
+                ###  OK XXX ### full_doc = doc XXX no suffix ???
+                full_docs = [Path(doc)]
+            # find our directive and pase it in doc file
+            # parse directive ars and split it in fct_helper, *args and **kwargs
+            ###  OK XXX ### with (open(full_doc) as f):
+            for full_doc in full_docs:
                 with (open(full_doc) as f):
                     fct_kwargs = {}
                     content = f.read()
@@ -65,11 +76,14 @@ class AutoPages:
                     for match in re.finditer(directive_regex, content):
                         line_num = content[:match.start()].count("\n") + 1
 
+                        # XXX KO my_args="a, b"
+                        # fct_args_kwargs = match.group(
+                        #     "args").replace(",", " ").replace("```", "").split()
                         fct_args_kwargs = match.group(
-                            "args").replace(",", " ").replace("```", "").split()
+                            "args").replace("```", "").split()
 
                         fct_name = fct_args_kwargs.pop(0)
-                        fct = getattr(module, fct_name, None)
+                        fct = getattr(self.module, fct_name, None)
                         assert fct and callable(fct), f"Error {fct_name} not found or not callable!"
                         # Build generated on their own subdir
                         work_dir = Path(full_doc.parent / f"_{full_doc.stem}_{line_num}")
@@ -94,11 +108,10 @@ class AutoPages:
                         }
                         logger.info(f"Running {fct.__name__}({fct_args}, {fct_kwargs})")
 
-                        # push generated files in _IDX
-                        if not doc in _IDX_MAP:
-                            _IDX_MAP[doc] = {}
-                        # _IDX_MAP[doc].append(work_dir.relative_to(self.env.srcdir))
-                        _IDX_MAP[doc][work_dir.relative_to(self.env.srcdir)] = []
+                        # push generated files in shelve: autopages_map_docs
+                        if doc not in self.autopages_map_docs:
+                            self.autopages_map_docs[doc] = {}
+                        self.autopages_map_docs[doc][work_dir.relative_to(self.env.srcdir)] = []
 
                         # Run fct_helper from working_directory
                         os.chdir(work_dir)
@@ -106,32 +119,36 @@ class AutoPages:
                         if local_genfiles:
                             relative_to_srcdir = work_dir.relative_to(self.env.srcdir)
                             local_genfiles = [str(relative_to_srcdir / f) for f in local_genfiles]
-                            all_genfiles.extend(local_genfiles)
-                            get_genfiles(
+                            self._get_genfiles(
                                 from_docs=local_genfiles,
                                 suffixes=suffixes,
-                                all_genfiles=all_genfiles
                             )
-                            _IDX_MAP[doc][work_dir.relative_to(self.env.srcdir)] = local_genfiles
+                            self.autopages_map_docs[doc][work_dir.relative_to(self.env.srcdir)] = local_genfiles  # noqa: E501
                         else:
                             logger.warning(f"{doc}, {fct.__name__}:{line_num} "
                                            f"does not return a list of created files.")
-            return all_genfiles if all_genfiles else None
+                        self.autopages_map_docs.sync()
 
+
+
+    def autopages(self) -> list[str] | None:
         # import conf.py
         module_name = "write_page_conf"
         file_path = Path(self.app.confdir / "conf.py")
         assert file_path.is_file()
         spec = importlib.util.spec_from_file_location(module_name, file_path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+        self.module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.module)
 
         # self.env.found_docs : list of docs WITHOUT suffix
+        if self.app.env.config.autopages_excludes:
+            self._excludes = [self.app.env.config.autopages_excludes] \
+                if isinstance(self.app.env.config.autopages_excludes, str) \
+                else self.app.env.config.autopages_excludes
         # we'll have to find the suffix and append it
-        return get_genfiles(
+        return self._get_genfiles(
             from_docs=list(self.env.found_docs),
             suffixes = list(self.app.config.source_suffix),
-            all_genfiles=None
         )
 
 
@@ -155,6 +172,11 @@ class AutoPagesDirective(SphinxDirective):
     }
 
     def run(self) -> list[Node]:
+        autopages_map_docs = shelve.open(  # noqa: SIM115
+            self.env.app.env.config.autopages_map_docs,
+            flag="r"
+        )
+
         # logger.warning(f"XXX arguments: {pformat(self.arguments, indent=4)}")
         doc = Path(self.env.docname)
         work_dir = Path(doc.parent / f"_{doc.stem}_{self.lineno}")
@@ -178,7 +200,10 @@ class AutoPagesDirective(SphinxDirective):
         rst += "\n\n"
         len_rst = len(rst)
 
-        for file_name in sorted(_IDX_MAP.get(self.env.docname).get(work_dir)):
+        for file_name in sorted(
+                autopages_map_docs.get(self.env.docname).get(work_dir)
+                or []
+        ):
             f_name = Path(file_name).relative_to(Path(self.env.docname).parent)
             rst += f"   {f_name!s}\n"
 
@@ -208,7 +233,55 @@ def on_builder_inited(app: Sphinx) -> None:
 
     # logger.warning("on_builfer_inited")
 
+    app.add_config_value(
+        name="autopages_map_docs",
+        default=app.doctreedir / "autopages_map_docs.db",
+        rebuild="env",
+        types=frozenset({Path})
+    )
+
+    # cleanup
+    on_builder_finished(app=app)
+
     w = AutoPages(app=app)
     genfiles = w.autopages()
     if not genfiles:
         return
+
+
+def on_builder_finished(app: Sphinx, exception: Exception | None = None) -> None:
+    if app.env.config.autopages_cleanup:
+        logger.info("Cleanup..........")
+        # logger.warning(app.config.source_suffix)
+        with shelve.open(
+            app.env.config.autopages_map_docs,
+            flag="c",
+            # writeback=True
+        ) as db:
+            if len(db):
+                for directive_file in sorted(
+                        db,
+                        key=lambda i: len(Path(i).parents),
+                        reverse=True
+                ):
+                    for directive_dir in db[directive_file]:
+                        for file_to_delete in db[directive_file][directive_dir]:
+                            for suffix in app.config.source_suffix:
+                                f_to_del = Path(app.srcdir / f"{file_to_delete!s}{suffix}")
+                                if f_to_del.is_file():
+                                    logger.info(f"removing file: {f_to_del}")
+                                    f_to_del.unlink()
+                        # logger.warning("===================")
+                        # # is_empty = not any(Path('some/path/here').iterdir())
+                        # d_to_del = Path(app.srcdir / directive_dir)
+                        # if d_to_del.is_dir() and not any(d_to_del.iterdir()):
+                        #     logger.info(f"removing dir: {d_to_del}")
+                        #     try:
+                        #         d_to_del.rmdir()
+                        #     except Exception as exc:
+                        #         logger.warning(exc, stack_info=True, exc_info=True)
+
+                        # logger.warning(directive_dir)
+                        # logger.warning(db[directive_file])
+                        # logger.warning(db[directive_file][directive_dir])
+                        del db[directive_file][directive_dir]

@@ -26,10 +26,21 @@ version = __version__ or "DEV"
 
 extensions = [
     "sphinx_autopages",
+    # Markdown
+    "myst_parser",
+    # site
+    "sphinx_design",
+    "sphinx_copybutton",
+    # APIdoc
     "autodoc2",
     "sphinx.ext.viewcode",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+]
+
+# sphinx_autopages
+autopages_excludes = [
+    "apidocs/"
 ]
 
 # autodoc2
